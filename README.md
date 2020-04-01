@@ -1,6 +1,6 @@
 # gx_gam
 
-A new Flutter package project.
+
 
 ## pubspec.yaml
 
