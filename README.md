@@ -7,5 +7,5 @@
 ```yaml
 gx_gam: 
     git:
-      url:  git://github.com/thelabs-dev/gx-gam.dart.git
+      url:  git://github.com/thelabs-dev/flutter-gx-gam.git
 ```
