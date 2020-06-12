@@ -1,19 +1,23 @@
-class ServiceResponse{
+
+/// Estructura de respuesta genérica de GAM
+class ServiceResponse {
   ServiceErrorResponse error;
   Object object;
   int statusCode;
 
-  ServiceResponse({this.error, this.object,this.statusCode});
-  ServiceResponse.fromJson(Map map){
-    if (map.containsKey('error') || map.containsKey('object')){
-      this.error = map.containsKey('error') ? ServiceErrorResponse.fromJson(map['error']) : null;
-      this.object  = map.containsKey('object') ? map['object'] : null;
-    }else{
-      throw("El JSON no corresponde al objeto ServiceResponse");
+  ServiceResponse({this.error, this.object, this.statusCode});
+  ServiceResponse.fromJson(Map map) {
+    if (map.containsKey('error') || map.containsKey('object')) {
+      this.error = map.containsKey('error')
+          ? ServiceErrorResponse.fromJson(map['error'])
+          : null;
+      this.object = map.containsKey('object') ? map['object'] : null;
+    } else {
+      throw ("El JSON no corresponde al objeto ServiceResponse");
     }
   }
 
-  log(){
+  log() {
     print("-----------------------------------------------------------");
     print("ServiceResponse: statusCode" + this.statusCode.toString());
     print("ServiceResponse: object" + this.object.toString());
@@ -21,7 +25,7 @@ class ServiceResponse{
     print("-----------------------------------------------------------");
   }
 
-   Map toJson() {
+  Map toJson() {
     var map = new Map<String, dynamic>();
     map["statusCode"] = this.statusCode;
     map["error"] = this.error.toJson();
@@ -30,18 +34,19 @@ class ServiceResponse{
   }
 }
 
-class ServiceErrorResponse{
+/// Estrucutra de respuesta de errores de GAM
+class ServiceErrorResponse {
   String code;
   String message;
 
   ServiceErrorResponse({this.code, this.message});
 
-  ServiceErrorResponse.fromJson(Map map){
+  ServiceErrorResponse.fromJson(Map map) {
     this.code = map["code"];
-    this.message  = map["message"];
+    this.message = map["message"];
   }
 
-  log(){
+  log() {
     print("-----------------------------------------------------------");
     print("ServiceErrorResponse: code " + this.code.toString());
     print("ServiceErrorResponse: message" + this.message.toString());

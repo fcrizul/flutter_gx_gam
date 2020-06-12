@@ -1,4 +1,4 @@
-library gx_gam;
+library flutter_gx_gam;
 
 export 'gam_config.dart';
 export 'gam_http.dart';

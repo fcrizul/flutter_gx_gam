@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:gx_gam/gx_gam.dart';
+import 'package:flutter_gx_gam/flutter_gx_gam.dart';
 import 'package:http/http.dart' as http;
-import 'dart:html' as html;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http_extensions/http_extensions.dart';
 import 'package:http_extensions_cache/http_extensions_cache.dart';
 import 'package:validators_helper/validators_helper.dart';
 
+/// HTTPClient para GAM, reutiliza la conexión e implementa cache para algunas llamas
 class GAMHttpClient {
   static final GAMHttpClient _singleton = GAMHttpClient._internal();
   MemoryCacheStore store;
@@ -20,8 +21,8 @@ class GAMHttpClient {
       inner: http.Client(),
       extensions: [
         CacheExtension(
-            defaultOptions: CacheOptions(
-                store: store, expiry: const Duration(minutes: 5))),
+            defaultOptions:
+                CacheOptions(store: store, expiry: const Duration(minutes: 5))),
       ],
     );
     httpClient = http.Client();
@@ -36,6 +37,7 @@ class GAMHttpClient {
   }
 }
 
+/// Conexión mediante REST con la API del GAM
 class GAMHttp {
   static Future<ServiceResponse> post(String url,
       {Map<String, String> headers,
@@ -53,25 +55,32 @@ class GAMHttp {
         }
         url = GAMConfig().baseUrl + url;
       }
-      String token = html.window.sessionStorage['access_token'];
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String token = prefs.getString("access_token");
       if (token != null) headers['Authorization'] = 'OAuth ' + token;
       headers["Content-Type"] = "application/json;charset=utf-8";
 
       if (GAMConfig().debug) {
-        print('GAMHttp: Request url: ${url}');
-        print('GAMHttp: Request body: ${body}');
-        print('GAMHttp: Request header: ${headers}');
+        print('GAMHttp: Request url: $url');
+        print('GAMHttp: Request body: $body');
+        print('GAMHttp: Request header: $headers');
       }
 
       http.Response response;
       if (useCache) {
         response = await GAMHttpClient().httpClientCache.postWithOptions(url,
             headers: headers, body: body, encoding: encoding);
-            
+
         //.timeout(const Duration(seconds: wsRestTimeout));
       } else {
-        response = await GAMHttpClient().httpClient
-            .post(url, headers: headers, body: body, encoding: encoding,)
+        response = await GAMHttpClient()
+            .httpClient
+            .post(
+              url,
+              headers: headers,
+              body: body,
+              encoding: encoding,
+            )
             .timeout(Duration(seconds: (GAMConfig().timeout)));
       }
       int statusCode = response.statusCode;
@@ -81,28 +90,30 @@ class GAMHttp {
       }
       ServiceResponse serviceResponse = ServiceResponse();
       String responseBody = utf8.decode(response.bodyBytes);
-      
-      if (ValidatorsHelper.isJson(responseBody)){
-        Map responseMap = json.decode(responseBody); 
+
+      if (ValidatorsHelper.isJson(responseBody)) {
+        Map responseMap = json.decode(responseBody);
         try {
           serviceResponse = ServiceResponse.fromJson(responseMap);
         } catch (_) {
-          if (GAMConfig().debug)
-            print(_);
+          if (GAMConfig().debug) print(_);
           serviceResponse = ServiceResponse();
           serviceResponse.object = responseMap;
-          serviceResponse.error = ServiceErrorResponse(code: statusCode.toString() ,message: "");
+          serviceResponse.error =
+              ServiceErrorResponse(code: statusCode.toString(), message: "");
         }
-      }else{
+      } else {
         serviceResponse.object = responseBody;
-        serviceResponse.error = ServiceErrorResponse(code: statusCode.toString() ,message: (statusCode ==200)? "": responseBody);
+        serviceResponse.error = ServiceErrorResponse(
+            code: statusCode.toString(),
+            message: (statusCode == 200) ? "" : responseBody);
       }
       serviceResponse.statusCode = statusCode;
-      if (statusCode != 200 && useThrow){
-        if(serviceResponse.error != null){
-          throw(serviceResponse.error.message);
-        }else{
-          throw("Error http ${serviceResponse.error}");
+      if (statusCode != 200 && useThrow) {
+        if (serviceResponse.error != null) {
+          throw (serviceResponse.error.message);
+        } else {
+          throw ("Error http ${serviceResponse.error}");
         }
       }
 

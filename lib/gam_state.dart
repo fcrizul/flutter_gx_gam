@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:gx_gam/gx_gam.dart';
+import 'package:flutter_gx_gam/flutter_gx_gam.dart';
 
-abstract class GAMState<T extends StatefulWidget> extends State <T> {
-
+abstract class GAMState<T extends StatefulWidget> extends State<T> {
   String permissionName;
   String roleName;
   bool showProgress = true;
@@ -13,14 +12,18 @@ abstract class GAMState<T extends StatefulWidget> extends State <T> {
   @mustCallSuper
   Widget build(BuildContext context) {
     return FutureBuilder<ServiceErrorResponse>(
-      future: GAMService.isAuthorized(permissionName: permissionName, roleName: roleName),
+      future: GAMService.isAuthorized(
+          permissionName: permissionName, roleName: roleName),
       builder: (ctx, snapshot) {
         if (snapshot.hasError) {
           return Container();
         } else {
           if (snapshot.hasData) {
-            if(GAMConfig().debug)
-              print("GAM.state " + snapshot.data.code + "- " + snapshot.data.message);
+            if (GAMConfig().debug)
+              print("GAM.state " +
+                  snapshot.data.code +
+                  "- " +
+                  snapshot.data.message);
             switch (snapshot.data.code) {
               case "200":
                 return buildAuthorized(context);
@@ -30,7 +33,8 @@ abstract class GAMState<T extends StatefulWidget> extends State <T> {
                 @override
                 void run() {
                   scheduleMicrotask(() {
-                    Navigator.pushReplacementNamed(context, GAMConfig().loginRoute);
+                    Navigator.pushReplacementNamed(
+                        context, GAMConfig().loginRoute);
                   });
                 }
                 run();
@@ -43,11 +47,12 @@ abstract class GAMState<T extends StatefulWidget> extends State <T> {
                 return Container();
             }
           } else {
-            return (showProgress) ?Center(
-                child: Column(mainAxisSize: MainAxisSize.min, 
-                children: [
-                  CircularProgressIndicator(),
-            ])): Container();
+            return (showProgress)
+                ? Center(
+                    child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    CircularProgressIndicator(),
+                  ]))
+                : Container();
           }
         }
       },

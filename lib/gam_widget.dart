@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:gx_gam/gx_gam.dart';
+import 'package:flutter_gx_gam/flutter_gx_gam.dart';
 
 class WidgetWithAuthorization extends StatefulWidget {
   final String permissionName;
@@ -22,7 +22,7 @@ class _WidgetWithAuthorization extends GAMState<WidgetWithAuthorization> {
   @override
   void initState() {
     super.initState();
-  
+
     this.permissionName = widget.permissionName;
     this.roleName = widget.roleName;
     this.showProgress = false;

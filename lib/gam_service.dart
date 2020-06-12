@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:html' as html;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:gx_gam/gx_gam.dart';
+import 'package:flutter_gx_gam/flutter_gx_gam.dart';
 import 'package:http/http.dart' as http;
 import 'package:validators_helper/validators_helper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class GAMService {
   static Future<ServiceResponse> login(String username, String password) async {
@@ -19,8 +19,8 @@ class GAMService {
     try {
       String url = GAMConfig().baseUrl + "/oauth/access_token";
       if (GAMConfig().debug) {
-        print('Request url: ${url}');
-        print('Request body: ${body}');
+        print('Request url: $url');
+        print('Request body: $body');
       }
 
       var response = await http
@@ -32,17 +32,18 @@ class GAMService {
       }
       GAMHttpClient().store.clean();
       String responseBody = utf8.decode(response.bodyBytes);
-      if (ValidatorsHelper.isJson(responseBody)){
+      if (ValidatorsHelper.isJson(responseBody)) {
         var responseMap = json.decode(responseBody);
         if (response.statusCode == 200) {
-          if (GAMConfig().debug) print('access_token: ' + responseMap["access_token"]);
+          if (GAMConfig().debug)
+            print('access_token: ' + responseMap["access_token"]);
 
-          html.window.sessionStorage['access_token'] =
-              responseMap["access_token"];
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('access_token', responseMap["access_token"]);
 
           if (GAMConfig().debug)
             print('Valor de access_token en sesion: ' +
-                html.window.sessionStorage['access_token']);
+                prefs.getString('access_token'));
 
           return ServiceResponse.fromJson({
             "error": {"code": "1", "message": "Login correcto!"}
@@ -50,12 +51,14 @@ class GAMService {
         } else {
           return ServiceResponse.fromJson(responseMap);
         }
-      }else{
+      } else {
         return ServiceResponse.fromJson({
-            "error": {"code": "${response.statusCode}", "message": "$responseBody"}
-          });
+          "error": {
+            "code": "${response.statusCode}",
+            "message": "$responseBody"
+          }
+        });
       }
-      
     } on TimeoutException catch (_) {
       return ServiceResponse.fromJson({
         "error": {
@@ -70,29 +73,27 @@ class GAMService {
           "message": "Error al procesar la respuesta Response SocketException"
         }
       });
-    } on Exception catch(_){
-       return ServiceResponse.fromJson({
-        "error": {
-          "code": "500",
-          "message": "Error al realizar el request: $_"
-        }
+    } on Exception catch (_) {
+      return ServiceResponse.fromJson({
+        "error": {"code": "500", "message": "Error al realizar el request: $_"}
       });
     }
   }
-  
+
   static Future<bool> logout(BuildContext context) async {
     try {
       String url = GAMConfig().baseUrl + "/oauth/logout";
       if (GAMConfig().debug) {
-        print('Request logout url: ${url}');
+        print('Request logout url: $url');
       }
-      Map<String,String> headers = new Map();
-      String token = html.window.sessionStorage['access_token'];
+      Map<String, String> headers = new Map();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String token = prefs.getString('access_token');
       if (token != null) headers['Authorization'] = 'OAuth ' + token;
       headers["Content-Type"] = "application/json;charset=utf-8";
 
       var response = await http
-          .post(url,headers: headers)
+          .post(url, headers: headers)
           .timeout(Duration(seconds: GAMConfig().timeout));
       if (GAMConfig().debug) {
         print('Response logout status: ${response.statusCode}');
@@ -100,7 +101,7 @@ class GAMService {
       }
 
       if (response.statusCode == 200) {
-        html.window.sessionStorage.remove('access_token');
+        prefs.remove("access_token");
         Navigator.pushReplacementNamed(context, GAMConfig().loginRoute);
         return true;
       } else {
@@ -116,15 +117,14 @@ class GAMService {
   }
 
   static Future<SDTGAMUser> userInfo() async {
-
     var response = await _postUserInfo(true);
-    try{
-      if (response.statusCode == 200){
+    try {
+      if (response.statusCode == 200) {
         return SDTGAMUser.fromJson(response.object);
-      }else{
+      } else {
         return SDTGAMUser("", "", "", "", "", "", "", "");
       }
-    }catch(_){
+    } catch (_) {
       return SDTGAMUser("", "", "", "", "", "", "", "");
     }
   }
@@ -133,7 +133,7 @@ class GAMService {
     try {
       String url = GAMConfig().baseUrl + "/oauth/userinfo";
       if (GAMConfig().debug) {
-        print('Request _postUserInfo url: ${url}');
+        print('Request _postUserInfo url: $url');
       }
       ServiceResponse response = await GAMHttp.post(url, useCache: useCache);
       if (GAMConfig().debug) {
@@ -146,14 +146,15 @@ class GAMService {
     }
   }
 
-  static bool isAuthenticated(BuildContext context) {
-    String value = html.window.sessionStorage['access_token'];
+  static Future<bool> isAuthenticated(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String value = prefs.getString('access_token');
     if (value != null && value.isNotEmpty) {
       try {
         _postUserInfo(false);
         return true;
       } catch (_) {
-        html.window.sessionStorage.remove('access_token');
+        prefs.remove("access_token");
         Navigator.pushReplacementNamed(context, GAMConfig().loginRoute);
         return false;
       }
@@ -161,17 +162,20 @@ class GAMService {
     return false;
   }
 
-  static Future<ServiceErrorResponse> isAuthorized({String permissionName, String roleName}) async {
+  static Future<ServiceErrorResponse> isAuthorized(
+      {String permissionName, String roleName}) async {
     var serviceErrorResponse;
-    String token = html.window.sessionStorage['access_token'];
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString('access_token');
     if (token != null && token.isNotEmpty) {
-      if (permissionName == null && roleName == null){
+      if (permissionName == null && roleName == null) {
         try {
           String url = GAMConfig().baseUrl + "/rest/gam_io/CheckAuthentication";
           if (GAMConfig().debug) {
             print('Request _checkPermission url: $url');
           }
-          ServiceResponse response = await GAMHttp.post(url, body: '', useCache: false, useThrow: false);
+          ServiceResponse response = await GAMHttp.post(url,
+              body: '', useCache: false, useThrow: false);
           if (GAMConfig().debug) {
             print('Response _checkRole statusCode: ${response.statusCode}');
             print('Response _checkRole code: ${response.error.code}');
@@ -181,14 +185,14 @@ class GAMService {
           });
         } catch (_) {
           print(_);
-          html.window.sessionStorage.remove('access_token');
+          prefs.remove('access_token');
           serviceErrorResponse = ServiceErrorResponse.fromJson(
               {"code": "401", "message": "Unauthorized"});
         }
-      }else{
-        if (permissionName != null){
+      } else {
+        if (permissionName != null) {
           serviceErrorResponse = _checkPermission(permissionName);
-        }else{
+        } else {
           serviceErrorResponse = _checkRole(roleName);
         }
       }
@@ -201,12 +205,16 @@ class GAMService {
     });
   }
 
-  static Future<ServiceErrorResponse> _checkPermission(String permission) async {
+  static Future<ServiceErrorResponse> _checkPermission(
+      String permission) async {
     String url = GAMConfig().baseUrl + "/rest/gam_io/CheckPermission";
     if (GAMConfig().debug) {
       print('Request _checkPermission url: $url');
     }
-    ServiceResponse response = await GAMHttp.post(url, body: '{"PermissionName":"$permission"}', useCache: false, useThrow: false);
+    ServiceResponse response = await GAMHttp.post(url,
+        body: '{"PermissionName":"$permission"}',
+        useCache: false,
+        useThrow: false);
     if (GAMConfig().debug) {
       print('Response _checkRole statusCode: ${response.statusCode}');
       print('Response _checkRole code: ${response.error.code}');
@@ -219,9 +227,10 @@ class GAMService {
   static Future<ServiceErrorResponse> _checkRole(String role) async {
     String url = GAMConfig().baseUrl + "/rest/gam_io/CheckRole";
     if (GAMConfig().debug) {
-      print('Request _checkRole url: ${url}');
+      print('Request _checkRole url: $url');
     }
-    ServiceResponse response = await GAMHttp.post(url,body: '{"roleName":"$role"}',  useCache: false, useThrow: false);
+    ServiceResponse response = await GAMHttp.post(url,
+        body: '{"roleName":"$role"}', useCache: false, useThrow: false);
     if (GAMConfig().debug) {
       print('Response _checkRole statusCode: ${response.statusCode}');
       print('Response _checkRole code: ${response.error.code}');

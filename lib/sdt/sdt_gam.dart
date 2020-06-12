@@ -1,7 +1,6 @@
+import 'package:flutter_gx_gam/gam_config.dart';
 
-
-import 'package:gx_gam/gx_gam.dart';
-
+/// Datos basicos del usuario almacenados en GAM
 class SDTGAMUser {
   final String name;
   final String firstName;
@@ -12,9 +11,9 @@ class SDTGAMUser {
   final String urlImage;
   final String urlProfile;
 
-  SDTGAMUser(this.name, this.firstName, this.lastName, this.eMail, this.birthday, this.gender, this.urlImage, this.urlProfile);
+  SDTGAMUser(this.name, this.firstName, this.lastName, this.eMail,
+      this.birthday, this.gender, this.urlImage, this.urlProfile);
 
-  @override
   Map toJson() {
     var map = new Map<String, dynamic>();
     map["Name"] = this.name;
@@ -28,7 +27,7 @@ class SDTGAMUser {
     return map;
   }
 
-  void log(){
+  void log() {
     print("-----------------------------------------------------------");
     print("SDTGAMUser: name: " + this.name);
     print("SDTGAMUser: firstName: " + this.firstName);
@@ -43,7 +42,7 @@ class SDTGAMUser {
 
   @override
   factory SDTGAMUser.fromJson(Map json) {
-    try{
+    try {
       return SDTGAMUser(
         json["Name"],
         json["FirstName"],
@@ -54,10 +53,9 @@ class SDTGAMUser {
         json["URLImage"],
         json["URLProfile"],
       );
-    } catch (_){
-      if (GAMConfig().debug)
-        print("El json no es un elemento de SDTGAMUser");
-      throw("El json no es un elemento de SDTGAMUser");
+    } catch (_) {
+      if (GAMConfig().debug) print("El json no es un elemento de SDTGAMUser");
+      throw ("El json no es un elemento de SDTGAMUser");
     }
   }
 }
