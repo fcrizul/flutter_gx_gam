@@ -5,7 +5,7 @@
 ## pubspec.yaml
 
 ```yaml
-gx_gam: 
+flutter-gx-gam: 
     git:
       url:  git://github.com/thelabs-dev/flutter-gx-gam.git
 ```
