@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gx_gam/flutter_gx_gam.dart';
 
+/// Widget que se encargan de controlar permisos
 class WidgetWithAuthorization extends StatefulWidget {
   final String permissionName;
   final String roleName;

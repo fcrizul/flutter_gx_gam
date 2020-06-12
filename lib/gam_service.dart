@@ -4,10 +4,11 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gx_gam/flutter_gx_gam.dart';
+import 'package:flutter_gx_gam/utils/validators_helper.dart';
 import 'package:http/http.dart' as http;
-import 'package:validators_helper/validators_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Servicio para utilizar el GAM
 class GAMService {
   static Future<ServiceResponse> login(String username, String password) async {
     String body = "client_id=" +

@@ -224,15 +224,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.4"
-  validators_helper:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: f8703d1e0d0cedadabe23954631f312aed3c8c43
-      url: "git://github.com/thelabs-dev/validators-helper.dart.git"
-    source: git
-    version: "0.0.1"
   vector_math:
     dependency: transitive
     description:

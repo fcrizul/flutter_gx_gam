@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gx_gam/flutter_gx_gam.dart';
 
+/// State para controlar permisos en pantalla
 abstract class GAMState<T extends StatefulWidget> extends State<T> {
   String permissionName;
   String roleName;

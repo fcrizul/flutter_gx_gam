@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_gx_gam/flutter_gx_gam.dart';
+import 'package:flutter_gx_gam/utils/validators_helper.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http_extensions/http_extensions.dart';
 import 'package:http_extensions_cache/http_extensions_cache.dart';
-import 'package:validators_helper/validators_helper.dart';
 
 /// HTTPClient para GAM, reutiliza la conexión e implementa cache para algunas llamas
 class GAMHttpClient {
