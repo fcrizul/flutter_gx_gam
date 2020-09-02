@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_gx_gam/flutter_gx_gam.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http_extensions/http_extensions.dart';
 import 'package:http_extensions_cache/http_extensions_cache.dart';
 
@@ -44,12 +43,11 @@ class GAMHttp {
       Encoding encoding,
       bool useCache = false,
       bool useThrow = true}) async {
-
     String token = await GAMService.getToken();
-    if (token == null){
-      return http.Response("Unauthorized",401);
+    if (token == null) {
+      return http.Response("Unauthorized", 401);
     }
-    
+
     try {
       if (headers == null) {
         headers = new Map();
@@ -60,7 +58,7 @@ class GAMHttp {
         }
         url = GAMConfig.baseUrl + url.trim();
       }
-     
+
       headers["Authorization"] = 'OAuth $token';
       headers["Content-Type"] = "application/json;charset=utf-8";
 
@@ -71,11 +69,8 @@ class GAMHttp {
       }
 
       if (useCache) {
-        return GAMHttpClient().httpClientCache.postWithOptions(
-              url,
-              headers: headers, 
-              body: body, 
-              encoding: encoding);
+        return GAMHttpClient().httpClientCache.postWithOptions(url,
+            headers: headers, body: body, encoding: encoding);
 
         //.timeout(const Duration(seconds: wsRestTimeout));
       } else {

@@ -10,20 +10,21 @@ mixin GAMState<T extends StatefulWidget> on State<T> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(( _ ) => _checkPermission( context ));
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _checkPermission(context));
   }
 
-  Future<void> _checkPermission( BuildContext context) async {
+  Future<void> _checkPermission(BuildContext context) async {
     bool isAuthenticated = await GAMService.isAuthenticated();
 
-    if (permission != null && permission.isNotEmpty){
+    if (permission != null && permission.isNotEmpty) {
       bool isAuthorized = await GAMService.isAuthorized(permission);
-      if (isAuthorized){
+      if (isAuthorized) {
         authorized(context);
         return;
       }
-    }else{
-      if (isAuthenticated){
+    } else {
+      if (isAuthenticated) {
         authorized(context);
         return;
       }
@@ -32,6 +33,6 @@ mixin GAMState<T extends StatefulWidget> on State<T> {
     notAuthorized(context, isAuthenticated);
   }
 
-  void authorized( BuildContext context );
-  void notAuthorized( BuildContext context, bool authenticated);
+  void authorized(BuildContext context);
+  void notAuthorized(BuildContext context, bool authenticated);
 }

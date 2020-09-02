@@ -17,8 +17,19 @@ class GAMUser {
   final String urlImage;
   final String urlProfile;
 
-  GAMUser(this.guid,this.nameSpace, this.authenticationTypeName, this.externalId, this.name, this.firstName, this.lastName, this.eMail,
-      this.birthday, this.gender, this.urlImage, this.urlProfile);
+  GAMUser(
+      this.guid,
+      this.nameSpace,
+      this.authenticationTypeName,
+      this.externalId,
+      this.name,
+      this.firstName,
+      this.lastName,
+      this.eMail,
+      this.birthday,
+      this.gender,
+      this.urlImage,
+      this.urlProfile);
 
   Map toJson() {
     var map = new Map<String, dynamic>();

@@ -1,4 +1,3 @@
-
 /// Estructura de respuesta genérica de GAM
 class ServiceResponse {
   ServiceErrorResponse error;
