@@ -23,7 +23,7 @@ GAMConfig.setProperties(
         }
         return false;
     },
-    checkPermission: (permission) async{
+    checkPermission: (String permission) async{
         return false;
     },
 );
