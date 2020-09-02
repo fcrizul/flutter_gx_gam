@@ -142,6 +142,10 @@ class GAMService {
     return token;
   }
 
+  static String getBaseUrl(){
+    return GAMConfig.baseUrl;
+  }
+
   static Future<http.Response> _postUserInfo(bool useCache) async {
     assert(GAMConfig.baseUrl != null, "GAMConfig().baseUrl no puede ser vacío");
 
